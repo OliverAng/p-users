@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="697edbbb-a597-4925-b3df-db712f242012" >
+		<http:listener-connection host="0.0.0.0" port="8085" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="350cbe7e-8ebf-41d3-b07f-007d1ef49f9b" >
+		<http:request-connection host="localhost" port="8082" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="b09c96af-2173-4d87-a27d-ea775ec0fd09" >
+		<http:request-connection host="localhost" port="8083" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration2" doc:name="HTTP Request configuration" doc:id="d03a9de4-d85a-444e-9631-c3041f7a18cb" >
+		<http:request-connection host="localhost" port="8084" />
+	</http:request-config>
+	<flow name="p-usersFlow" doc:id="f4bdf70d-3428-423c-82cf-171a862f999a" >
+		<http:listener doc:name="/test" doc:id="0551285f-b583-412c-aec7-e8d39b14d6b1" config-ref="HTTP_Listener_config" path="/test"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="8a31a010-c0f3-45c6-8153-5a1e0fa384cc" >
+			<route >
+				<http:request method="GET" doc:name="Request" doc:id="732ac884-0385-4700-bb9d-6023ef4d176c" config-ref="HTTP_Request_configuration" path="/test1"/>
+			</route>
+			<route >
+				<http:request method="OPTIONS" doc:name="Request" doc:id="8e561038-7e9f-41c0-b15e-d0c79f7da7c5" config-ref="HTTP_Request_configuration1" path="/db"/>
+			</route>
+			<route >
+				<http:request method="GET" doc:name="Request" doc:id="2211957a-496e-4cde-9454-01894b44197a" config-ref="HTTP_Request_configuration2" path="/local"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="2d3b2c3a-45e1-4373-b28c-8d7db875ec0e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+flatten(payload..payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="9fb2701f-4a99-473f-aec7-d6376b74af69" mimeType="application/json"/>
+	</flow>
+</mule>
